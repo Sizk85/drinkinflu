@@ -273,9 +273,9 @@ export const seatBookings = pgTable('seat_bookings', {
   updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),
 }, (table) => {
   return {
-    customerIdIdx: index('customer_id_idx').on(table.customerId),
-    seatKeeperIdIdx: index('seat_keeper_id_idx').on(table.seatKeeperId),
-    statusIdx: index('status_idx').on(table.status),
+    bookingCustomerIdIdx: index('booking_customer_id_idx').on(table.customerId),
+    bookingSeatKeeperIdIdx: index('booking_seat_keeper_id_idx').on(table.seatKeeperId),
+    bookingStatusIdx: index('booking_status_idx').on(table.status),
   }
 })
 
