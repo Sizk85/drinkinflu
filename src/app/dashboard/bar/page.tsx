@@ -2,9 +2,17 @@ import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Wallet, Briefcase, Users, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 
-export default function BarDashboard() {
-  // TODO: Fetch real data from API
+export default async function BarDashboard() {
+  const session = await auth()
+  
+  if (!session?.user) {
+    redirect('/auth/signin')
+  }
+
+  // TODO: Fetch real data from API based on session.user.id
   const stats = {
     walletBalance: 45200,
     activeJobs: 3,

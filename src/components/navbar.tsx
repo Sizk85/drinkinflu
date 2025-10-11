@@ -2,11 +2,15 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, LogOut } from 'lucide-react'
 import { useState } from 'react'
+import { useSession, signOut } from 'next-auth/react'
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { data: session, status } = useSession()
+  const isLoading = status === 'loading'
+  const isLoggedIn = !!session?.user
 
   return (
     <nav className="sticky top-0 z-50 glass border-b border-border/50">
@@ -39,12 +43,26 @@ export function Navbar() {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/auth/signin">
-              <Button variant="ghost">เข้าสู่ระบบ</Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button>สมัครสมาชิก</Button>
-            </Link>
+            {isLoggedIn ? (
+              <>
+                <Link href="/dashboard">
+                  <Button variant="ghost">แดชบอร์ด</Button>
+                </Link>
+                <Button variant="ghost" onClick={() => signOut({ callbackUrl: '/' })}>
+                  <LogOut size={16} className="mr-2" />
+                  ออกจากระบบ
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/signin">
+                  <Button variant="ghost">เข้าสู่ระบบ</Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button>สมัครสมาชิก</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -75,12 +93,29 @@ export function Navbar() {
               ทีม
             </Link>
             <div className="pt-4 space-y-2">
-              <Link href="/auth/signin" className="block">
-                <Button variant="ghost" className="w-full">เข้าสู่ระบบ</Button>
-              </Link>
-              <Link href="/auth/signup" className="block">
-                <Button className="w-full">สมัครสมาชิก</Button>
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <Link href="/dashboard" className="block">
+                    <Button className="w-full">แดชบอร์ด</Button>
+                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full" 
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                  >
+                    ออกจากระบบ
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth/signin" className="block">
+                    <Button variant="ghost" className="w-full">เข้าสู่ระบบ</Button>
+                  </Link>
+                  <Link href="/auth/signup" className="block">
+                    <Button className="w-full">สมัครสมาชิก</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}

@@ -1,8 +1,16 @@
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Users, Briefcase, DollarSign, TrendingUp } from 'lucide-react'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const session = await auth()
+  
+  if (!session?.user || session.user.role !== 'admin') {
+    redirect('/dashboard')
+  }
+
   // TODO: Fetch real data from API
   const stats = {
     totalUsers: 542,

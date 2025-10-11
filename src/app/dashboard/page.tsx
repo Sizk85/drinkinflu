@@ -2,10 +2,17 @@ import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { BarChart3, Star, Shield } from 'lucide-react'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 
-export default function DashboardPage() {
-  // TODO: Get user role from session
-  const userRole = 'guest' // In production, get from NextAuth session
+export default async function DashboardPage() {
+  const session = await auth()
+  
+  if (!session?.user) {
+    redirect('/auth/signin')
+  }
+
+  const userRole = session.user.role
 
   return (
     <div className="min-h-screen">

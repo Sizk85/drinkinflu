@@ -8,13 +8,13 @@ import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  secret: process.env.NEXTAUTH_SECRET || 'drinkinflu-default-secret-change-in-production',
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || 'drinkinflu-default-secret-change-in-production',
+  trustHost: true,
   session: {
     strategy: 'jwt',
   },
   pages: {
     signIn: '/auth/signin',
-    signOut: '/auth/signin',
     error: '/auth/error',
   },
   providers: [

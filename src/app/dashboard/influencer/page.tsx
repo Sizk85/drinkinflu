@@ -2,9 +2,17 @@ import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Wallet, Calendar, Star, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 
-export default function InfluencerDashboard() {
-  // TODO: Fetch real data from API
+export default async function InfluencerDashboard() {
+  const session = await auth()
+  
+  if (!session?.user) {
+    redirect('/auth/signin')
+  }
+
+  // TODO: Fetch real data from API based on session.user.id
   const stats = {
     walletBalance: 15420,
     totalJobs: 28,
