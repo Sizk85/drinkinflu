@@ -2,13 +2,13 @@
 
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 
-export default function SignUpPage() {
+function SignUpForm() {
   const { toast } = useToast()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -78,16 +78,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      
-      <div className="max-w-md mx-auto px-6 py-16">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2 neon-text">สมัครสมาชิก</h1>
-          <p className="text-muted">เข้าร่วมกับเราวันนี้! 🚀</p>
-        </div>
-
-        <div className="glass rounded-2xl p-8">
+    <div className="glass rounded-2xl p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium mb-2">คุณคือ?</label>
@@ -200,6 +191,27 @@ export default function SignUpPage() {
             </div>
           </div>
         </div>
+  )
+}
+
+export default function SignUpPage() {
+  return (
+    <div className="min-h-screen">
+      <Navbar />
+      
+      <div className="max-w-md mx-auto px-6 py-16">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold mb-2 neon-text">สมัครสมาชิก</h1>
+          <p className="text-muted">เข้าร่วมกับเราวันนี้! 🚀</p>
+        </div>
+
+        <Suspense fallback={
+          <div className="glass rounded-2xl p-8 text-center">
+            <div className="text-muted">กำลังโหลด...</div>
+          </div>
+        }>
+          <SignUpForm />
+        </Suspense>
       </div>
     </div>
   )
