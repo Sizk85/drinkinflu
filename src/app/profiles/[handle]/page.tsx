@@ -7,6 +7,9 @@ import { users } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function ProfilePage({ params }: { params: { handle: string } }) {
   // Fetch user by handle
   const [user] = await db

@@ -5,6 +5,9 @@ import { db } from '@/db'
 import { jobs, users } from '@/db/schema'
 import { eq, and, gte } from 'drizzle-orm'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function ExplorePage() {
   // Fetch open jobs with bar details
   const openJobs = await db

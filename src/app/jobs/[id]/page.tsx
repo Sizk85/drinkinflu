@@ -10,6 +10,9 @@ import { formatDateTime } from '@/lib/date-utils'
 import { MapPin, Calendar, Users as UsersIcon, DollarSign, Wine, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function JobDetailPage({ params }: { params: { id: string } }) {
   // Fetch job with bar details
   const [jobData] = await db
