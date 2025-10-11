@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: drinkinflu-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: drinkinflu
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (for BullMQ)
+  redis:
+    image: redis:7-alpine
+    container_name: drinkinflu-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Next.js Web Application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: drinkinflu-web
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/drinkinflu
+      REDIS_URL: redis://redis:6379
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: drinkinflu-secret-key-change-in-production
+      PLATFORM_COMMISSION: 0.15
+      WITHDRAWAL_FEE: 0.02
+      R2_ACCOUNT_ID: mock-account
+      R2_ACCESS_KEY_ID: mock-key
+      R2_SECRET_ACCESS_KEY: mock-secret
+      R2_BUCKET_NAME: drinkinflu-uploads
+      R2_PUBLIC_URL: http://localhost:3000/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./public/uploads:/app/public/uploads
+
+  # BullMQ Worker (placeholder)
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: drinkinflu-worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/drinkinflu
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+
