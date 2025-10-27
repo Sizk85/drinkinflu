@@ -23,7 +23,6 @@ function ErrorContent() {
       
       <div className="max-w-md mx-auto px-6 py-24">
         <div className="glass rounded-2xl p-12 text-center">
-          <div className="text-6xl mb-6">⚠️</div>
           <h1 className="text-3xl font-bold mb-4">เกิดข้อผิดพลาด</h1>
           <p className="text-muted mb-8">
             {error ? errorMessages[error] || errorMessages.Default : errorMessages.Default}

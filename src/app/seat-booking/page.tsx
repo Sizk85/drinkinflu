@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { BANGKOK_ZONES } from '@/lib/constants'
 import { calculateSeatKeeperPrice, suggestKeeperStartTime } from '@/lib/seat-keeper-pricing'
 import { formatCurrency } from '@/lib/pricing'
 import { Clock, MapPin, Users, Shield } from 'lucide-react'
 
 export default function SeatBookingPage() {
+  const { data: session, status } = useSession()
   const { toast } = useToast()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -45,6 +47,18 @@ export default function SeatBookingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // ตรวจสอบว่าล็อกอินแล้วหรือยัง
+    if (!session?.user?.id) {
+      toast({
+        title: 'กรุณาเข้าสู่ระบบ',
+        description: 'คุณต้องเข้าสู่ระบบก่อนจองโต๊ะ',
+        variant: 'destructive',
+      })
+      router.push('/auth/signin')
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -52,7 +66,7 @@ export default function SeatBookingPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          customerId: 'temp-user-id', // TODO: Get from session
+          customerId: session.user.id,
           venueName,
           venueZone,
           venueAddress,
@@ -86,6 +100,20 @@ export default function SeatBookingPage() {
     }
   }
 
+  // Loading state
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-6 py-12">
+          <div className="glass rounded-2xl p-12 text-center">
+            <p className="text-muted">กำลังโหลด...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -99,6 +127,11 @@ export default function SeatBookingPage() {
           <p className="text-xl text-muted">
             มีคนนั่งโต๊ะรอคุณอยู่แล้ว ไม่ต้องกลัวไม่มีที่นั่ง!
           </p>
+          {!session && (
+            <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+              <p className="text-yellow-500">กรุณาเข้าสู่ระบบก่อนจองโต๊ะ</p>
+            </div>
+          )}
         </div>
 
         {/* How it works */}
