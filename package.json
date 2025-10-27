@@ -31,6 +31,7 @@
     "@radix-ui/react-toast": "^1.2.2",
     "bcryptjs": "^2.4.3",
     "drizzle-orm": "^0.36.4",
+    "drizzle-kit": "^0.29.1",
     "postgres": "^3.4.5",
     "@aws-sdk/client-s3": "^3.709.0",
     "@aws-sdk/s3-request-presigner": "^3.709.0",
@@ -42,7 +43,8 @@
     "lucide-react": "^0.468.0",
     "date-fns": "^4.1.0",
     "zod": "^3.24.1",
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "tsx": "^4.19.2"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
@@ -54,8 +56,6 @@
     "tailwindcss-animate": "^1.0.7",
     "postcss": "^8.4.49",
     "autoprefixer": "^10.4.20",
-    "drizzle-kit": "^0.29.1",
-    "tsx": "^4.19.2",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.20",
     "prettier": "^3.4.2",
