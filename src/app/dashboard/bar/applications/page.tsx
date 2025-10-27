@@ -19,7 +19,6 @@ export default async function BarApplicationsPage() {
         <h1 className="text-4xl font-bold mb-8 neon-text">ผู้สมัครงาน</h1>
         
         <div className="glass rounded-2xl p-12 text-center">
-          <div className="text-6xl mb-4">👥</div>
           <h2 className="text-2xl font-bold mb-4">รายการผู้สมัคร</h2>
           <p className="text-muted mb-6">ดูและอนุมัติผู้สมัครงานของคุณ</p>
           <Link href="/dashboard/bar">

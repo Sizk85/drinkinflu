@@ -13,23 +13,22 @@ export default function Home() {
       <section className="py-24 px-6 bg-gradient-to-b from-primary/10 to-transparent">
         <div className="max-w-6xl mx-auto">
           <div className="glass rounded-2xl p-12 text-center">
-            <div className="text-6xl mb-4">🪑</div>
             <h2 className="text-4xl font-bold mb-4 neon-text">
               NEW! Seat Keeper
             </h2>
             <p className="text-xl text-muted mb-8 max-w-3xl mx-auto">
               ไม่ต้องกลัวไม่มีโต๊ะ! มีคนนั่งรอคุณอยู่แล้ว<br />
-              หรืออยากหารายได้เสริม? สมัครเป็น Seat Keeper รับเงิน 150฿/ชม.
+              หรืออยากหารายได้เสริม? สมัครเป็น Seat Keeper รับเงิน 150 บาท/ชม.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/seat-booking">
                 <Button size="lg" className="text-lg px-8">
-                  🪑 จองโต๊ะ (ลูกค้า)
+                  จองโต๊ะ (ลูกค้า)
                 </Button>
               </Link>
               <Link href="/seat-keeper">
                 <Button size="lg" variant="outline" className="text-lg px-8 border-accent text-accent hover:bg-accent hover:text-black">
-                  💰 สมัครเป็น Keeper
+                  สมัครเป็น Keeper
                 </Button>
               </Link>
             </div>
@@ -47,7 +46,6 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {/* For Bars */}
             <div className="glass rounded-2xl p-8 hover:glow-primary transition-all">
-              <div className="text-5xl mb-4">🍸</div>
               <h3 className="text-2xl font-bold mb-4 text-primary">สำหรับร้านเหล้า/บาร์</h3>
               <ul className="space-y-3 text-muted">
                 <li>✅ โพสต์งานง่าย คำนวณต้นทุนอัตโนมัติ</li>
@@ -64,7 +62,6 @@ export default function Home() {
 
             {/* For Influencers */}
             <div className="glass rounded-2xl p-8 hover:glow-accent transition-all">
-              <div className="text-5xl mb-4">⭐</div>
               <h3 className="text-2xl font-bold mb-4 text-accent">สำหรับอินฟลูเอนเซอร์</h3>
               <ul className="space-y-3 text-muted">
                 <li>✅ หางานง่าย ฟิลเตอร์ตามโซนที่สะดวก</li>
@@ -81,7 +78,6 @@ export default function Home() {
 
             {/* For Teams/Moms */}
             <div className="glass rounded-2xl p-8 hover:glow-primary transition-all">
-              <div className="text-5xl mb-4">👥</div>
               <h3 className="text-2xl font-bold mb-4 text-primary">สำหรับโม/ทีม</h3>
               <ul className="space-y-3 text-muted">
                 <li>✅ จัดการทีมในที่เดียว</li>

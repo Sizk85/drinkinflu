@@ -39,7 +39,7 @@ export default async function InfluencerDashboard() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-2 neon-text">แดชบอร์ดอินฟลูเอนเซอร์</h1>
-          <p className="text-muted">ยินดีต้อนรับกลับมา! ✨</p>
+          <p className="text-muted">ยินดีต้อนรับกลับมา!</p>
         </div>
 
         {/* Stats Cards */}
@@ -91,12 +91,12 @@ export default async function InfluencerDashboard() {
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           <Link href="/explore">
             <Button className="w-full h-20 text-lg">
-              🔍 ค้นหางานใหม่
+              ค้นหางานใหม่
             </Button>
           </Link>
           <Link href="/verify">
             <Button variant="outline" className="w-full h-20 text-lg">
-              📸 ส่งหลักฐานโพสต์
+              ส่งหลักฐานโพสต์
             </Button>
           </Link>
           <Link href="/profiles/me">

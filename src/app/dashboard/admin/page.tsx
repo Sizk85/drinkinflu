@@ -76,16 +76,16 @@ export default async function AdminDashboard() {
         {/* Quick Actions */}
         <div className="grid md:grid-cols-4 gap-6 mb-12">
           <Button className="h-16">
-            👥 จัดการผู้ใช้
+            จัดการผู้ใช้
           </Button>
           <Button variant="outline" className="h-16">
             📋 ตรวจสอบงาน
           </Button>
           <Button variant="outline" className="h-16">
-            💰 ธุรกรรม
+            ธุรกรรม
           </Button>
           <Button variant="outline" className="h-16">
-            📊 รายงาน
+            รายงาน
           </Button>
         </div>
 

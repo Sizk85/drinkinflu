@@ -71,12 +71,11 @@ export default function AvailableJobsPage() {
       <div className="max-w-5xl mx-auto px-6 py-12">
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-2 neon-text">งาน Seat Keeper ว่าง</h1>
-          <p className="text-muted">เลือกงานที่เหมาะกับคุณ 🪑</p>
+          <p className="text-muted">เลือกงานที่เหมาะกับคุณ</p>
         </div>
 
         {availableBookings.length === 0 ? (
           <div className="glass rounded-2xl p-12 text-center">
-            <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-2xl font-bold mb-2">ไม่มีงานว่างในขณะนี้</h3>
             <p className="text-muted">กลับมาดูใหม่ภายหลัง</p>
           </div>

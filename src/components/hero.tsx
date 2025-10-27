@@ -27,7 +27,7 @@ export function Hero() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link href="/auth/signup?role=bar">
             <Button size="lg" className="text-lg px-10 py-6 h-auto">
-              🍸 สำหรับร้านเหล้า
+              สำหรับร้านเหล้า
             </Button>
           </Link>
           <Link href="/auth/signup?role=influencer">
@@ -36,7 +36,7 @@ export function Hero() {
               variant="outline" 
               className="text-lg px-10 py-6 h-auto border-accent text-accent hover:bg-accent hover:text-black"
             >
-              ⭐ สำหรับอินฟลู
+              สำหรับอินฟลู
             </Button>
           </Link>
         </div>

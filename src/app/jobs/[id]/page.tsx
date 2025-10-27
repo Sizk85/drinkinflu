@@ -59,7 +59,7 @@ export default async function JobDetailPage({ params }: { params: { id: string }
                 {bar?.barLogo ? (
                   <Image src={bar.barLogo} alt={bar.barName || ''} width={128} height={128} className="w-full h-full object-cover rounded-2xl" />
                 ) : (
-                  '🍸'
+                  <Wine className="text-accent" size={40} />
                 )}
               </div>
             </div>

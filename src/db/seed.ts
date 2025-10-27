@@ -84,7 +84,7 @@ async function seed() {
         rating: '4.8',
         totalJobs: 45,
         isPremium: true,
-        bio: 'Bangkok nightlife enthusiast 🌙✨',
+        bio: 'Bangkok nightlife enthusiast',
       },
       {
         email: 'max@influ.com',
@@ -340,7 +340,7 @@ async function seed() {
     console.log('Admin: admin@drinkinflu.com / admin123')
     console.log('Bar: route66@bar.com / bar123')
     console.log('Influencer: bella@influ.com / influ123')
-    console.log('\n🪑 Seat Keeper:')
+    console.log('\n[Seat Keeper]')
     console.log('Bella is also a Seat Keeper (200฿/hr)')
     console.log('Max is also a Seat Keeper (150฿/hr)')
 

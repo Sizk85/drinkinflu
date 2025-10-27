@@ -1,6 +1,6 @@
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
-import { MapPin, Instagram, Star, Briefcase } from 'lucide-react'
+import { MapPin, Instagram, Star, Briefcase, Wine } from 'lucide-react'
 import Image from 'next/image'
 import { db } from '@/db'
 import { users } from '@/db/schema'
@@ -39,7 +39,9 @@ export default async function ProfilePage({ params }: { params: { handle: string
                 {user.avatarUrl ? (
                   <Image src={user.avatarUrl} alt={user.name} width={128} height={128} className="w-full h-full object-cover rounded-2xl" />
                 ) : (
-                  isBar ? '🍸' : '⭐'
+                  <div className="w-full h-full bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
+                    {isBar ? <Wine className="text-accent" size={40} /> : <Star className="text-yellow-500" size={40} />}
+                  </div>
                 )}
               </div>
             </div>

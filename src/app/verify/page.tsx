@@ -93,7 +93,7 @@ export default function VerifyPage() {
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-2 neon-text">ส่งหลักฐานโพสต์</h1>
-          <p className="text-muted">อัปโหลดสกรีนสตอรี่ Instagram เพื่อตรวจสอบ 📸</p>
+          <p className="text-muted">อัปโหลดสกรีนสตอรี่ Instagram เพื่อตรวจสอบ</p>
         </div>
 
         {/* Instructions */}

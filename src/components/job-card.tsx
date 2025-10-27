@@ -20,13 +20,15 @@ export function JobCard({ job, bar }: JobCardProps) {
       <div className="flex flex-col md:flex-row gap-6">
         {/* Bar Logo/Avatar */}
         <div className="flex-shrink-0">
-          <div className="w-20 h-20 rounded-xl bg-primary/20 flex items-center justify-center text-4xl">
-            {bar?.barLogo ? (
-              <Image src={bar.barLogo} alt={bar.barName || ''} width={80} height={80} className="w-full h-full object-cover rounded-xl" />
-            ) : (
-              '🍸'
-            )}
-          </div>
+          {bar?.barLogo ? (
+            <div className="w-20 h-20 rounded-xl overflow-hidden">
+              <Image src={bar.barLogo} alt={bar.barName || ''} width={80} height={80} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
+              <Wine size={32} className="text-accent" />
+            </div>
+          )}
         </div>
 
         {/* Job Details */}

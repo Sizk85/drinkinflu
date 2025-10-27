@@ -39,7 +39,7 @@ export default async function BarDashboard() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-2 neon-text">แดชบอร์ดร้านเหล้า/บาร์</h1>
-          <p className="text-muted">จัดการงานและอินฟลูของคุณ 🍸</p>
+          <p className="text-muted">จัดการงานและอินฟลูของคุณ</p>
         </div>
 
         {/* Stats Cards */}
@@ -96,7 +96,7 @@ export default async function BarDashboard() {
           </Link>
           <Link href="/dashboard/bar/applications">
             <Button variant="outline" className="w-full h-20 text-lg">
-              👥 ดูผู้สมัคร
+              ดูผู้สมัคร
             </Button>
           </Link>
           <Link href="/profiles/me">

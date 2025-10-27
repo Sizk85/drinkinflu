@@ -26,7 +26,7 @@ export default function TeamsPage() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-2 neon-text">ทีม / โม</h1>
-          <p className="text-muted">จัดการทีมของคุณและแบ่งส่วนแบ่งอัตโนมัติ 👥</p>
+          <p className="text-muted">จัดการทีมของคุณและแบ่งส่วนแบ่งอัตโนมัติ</p>
         </div>
 
         {/* Team Overview */}
@@ -87,7 +87,7 @@ export default function TeamsPage() {
                   <div key={member.id} className="flex items-center justify-between p-4 bg-card rounded-xl">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-2xl">
-                        ⭐
+                        ★
                       </div>
                       <div>
                         <div className="font-bold">{member.name}</div>

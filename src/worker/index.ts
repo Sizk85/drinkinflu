@@ -124,7 +124,7 @@ paymentWorker.on('failed', (job, err) => {
   console.error(`❌ Payment job ${job?.id} failed:`, err)
 })
 
-console.log('🚀 BullMQ workers started')
+console.log('[Worker] BullMQ workers started')
 console.log('📋 Listening to queues: verification, payment')
 
 // Graceful shutdown

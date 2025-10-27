@@ -48,7 +48,6 @@ export default async function ExplorePage() {
           <div className="lg:col-span-3">
             {openJobs.length === 0 ? (
               <div className="glass rounded-2xl p-12 text-center">
-                <div className="text-6xl mb-4">🔍</div>
                 <h3 className="text-2xl font-bold mb-2">ไม่พบงาน</h3>
                 <p className="text-muted">ลองเปลี่ยนฟิลเตอร์หรือกลับมาใหม่ภายหลัง</p>
               </div>
@@ -59,7 +58,7 @@ export default async function ExplorePage() {
                 </div>
                 <div className="grid gap-6">
                   {openJobs.map(({ job, bar }) => (
-                    <JobCard key={job.id} job={job} bar={bar} />
+                    <JobCard key={job.id} job={job} bar={bar ?? null} />
                   ))}
                 </div>
               </div>

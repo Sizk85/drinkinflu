@@ -154,7 +154,7 @@ export default function SignInPage() {
 
           <div className="mt-6 text-center">
             <p className="text-xs text-muted">
-              💡 ทดสอบด้วย: bella@influ.com / influ123
+              ทดสอบด้วย: bella@influ.com / influ123
             </p>
           </div>
         </div>

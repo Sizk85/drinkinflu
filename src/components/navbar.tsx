@@ -18,7 +18,7 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="text-2xl">🍸</div>
+            <div className="text-2xl font-bold text-primary">DI</div>
             <span className="text-2xl font-bold neon-text">DrinkInflu</span>
           </Link>
 
@@ -31,10 +31,10 @@ export function Navbar() {
               โพสต์งาน
             </Link>
             <Link href="/seat-booking" className="text-muted hover:text-white transition-colors">
-              🪑 จองโต๊ะ
+              จองโต๊ะ
             </Link>
             <Link href="/seat-keeper" className="text-muted hover:text-white transition-colors">
-              💰 Seat Keeper
+              Seat Keeper
             </Link>
             <Link href="/teams" className="text-muted hover:text-white transition-colors">
               ทีม
@@ -84,10 +84,10 @@ export function Navbar() {
               โพสต์งาน
             </Link>
             <Link href="/seat-booking" className="block text-muted hover:text-white transition-colors py-2">
-              🪑 จองโต๊ะ
+              จองโต๊ะ
             </Link>
             <Link href="/seat-keeper" className="block text-muted hover:text-white transition-colors py-2">
-              💰 Seat Keeper
+              Seat Keeper
             </Link>
             <Link href="/teams" className="block text-muted hover:text-white transition-colors py-2">
               ทีม

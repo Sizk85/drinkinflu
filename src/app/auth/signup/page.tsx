@@ -202,7 +202,7 @@ export default function SignUpPage() {
       <div className="max-w-md mx-auto px-6 py-16">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2 neon-text">สมัครสมาชิก</h1>
-          <p className="text-muted">เข้าร่วมกับเราวันนี้! 🚀</p>
+          <p className="text-muted">เข้าร่วมกับเราวันนี้!</p>
         </div>
 
         <Suspense fallback={

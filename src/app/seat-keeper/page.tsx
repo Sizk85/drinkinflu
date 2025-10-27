@@ -105,7 +105,7 @@ export default function SeatKeeperPage() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-2 neon-text">Seat Keeper Dashboard</h1>
-          <p className="text-muted">รับงาน นั่งโต๊ะ รับเงิน 💰</p>
+          <p className="text-muted">รับงาน นั่งโต๊ะ รับเงิน</p>
         </div>
 
         {/* Stats */}
@@ -130,7 +130,7 @@ export default function SeatKeeperPage() {
 
           <div className="glass rounded-2xl p-6">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-yellow-500">⭐</span>
+              <span className="text-yellow-500">★</span>
               <span className="text-sm text-muted">เรตติ้ง</span>
             </div>
             <div className="text-3xl font-bold text-yellow-500">{stats.rating}</div>
@@ -149,7 +149,7 @@ export default function SeatKeeperPage() {
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           <Link href="/seat-keeper/available">
             <Button className="w-full h-16 text-lg">
-              🔍 หางานใหม่
+              หางานใหม่
             </Button>
           </Link>
           <Link href="/seat-keeper/settings">
@@ -159,7 +159,7 @@ export default function SeatKeeperPage() {
           </Link>
           <Link href="/wallet">
             <Button variant="outline" className="w-full h-16 text-lg">
-              💰 ถอนเงิน
+              ถอนเงิน
             </Button>
           </Link>
         </div>
@@ -218,7 +218,7 @@ export default function SeatKeeperPage() {
                     </div>
                     {booking.status === 'confirmed' && (
                       <Button onClick={() => handleCheckIn(booking.id)}>
-                        📸 เช็คอิน
+                        เช็คอิน
                       </Button>
                     )}
                   </div>

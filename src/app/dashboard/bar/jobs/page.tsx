@@ -19,7 +19,6 @@ export default async function BarJobsPage() {
         <h1 className="text-4xl font-bold mb-8 neon-text">งานทั้งหมด</h1>
         
         <div className="glass rounded-2xl p-12 text-center">
-          <div className="text-6xl mb-4">🍸</div>
           <h2 className="text-2xl font-bold mb-4">งานของร้าน</h2>
           <p className="text-muted mb-6">รายการงานที่คุณโพสต์ทั้งหมด</p>
           <Link href="/post-job">

@@ -213,6 +213,12 @@ export const seatKeepers = pgTable('seat_keepers', {
   isActive: boolean('is_active').default(true),
   rating: decimal('rating', { precision: 3, scale: 2 }).default('0'),
   totalBookings: integer('total_bookings').default(0),
+  totalReviews: integer('total_reviews').default(0),
+  
+  // Verification (NEW!)
+  isVerified: boolean('is_verified').default(false),
+  verificationStatus: text('verification_status').default('unverified'), // 'unverified', 'pending', 'verified', 'rejected'
+  verifiedBadges: jsonb('verified_badges').$type<string[]>(), // ['id_verified', 'phone_verified', 'top_rated']
   
   // Availability
   availableZones: jsonb('available_zones').$type<string[]>(), // ['ทองหล่อ', 'RCA']
@@ -224,6 +230,11 @@ export const seatKeepers = pgTable('seat_keepers', {
   // Earnings
   totalEarnings: decimal('total_earnings', { precision: 10, scale: 2 }).default('0'),
   hourlyRate: decimal('hourly_rate', { precision: 10, scale: 2 }).default('150'), // ค่าบริการต่อชั่วโมง
+  totalTipsReceived: decimal('total_tips_received', { precision: 10, scale: 2 }).default('0'),
+  
+  // Stats
+  completionRate: decimal('completion_rate', { precision: 3, scale: 2 }).default('0'), // 0-100%
+  averageResponseTime: integer('average_response_time'), // minutes
   
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),
@@ -279,6 +290,212 @@ export const seatBookings = pgTable('seat_bookings', {
   }
 })
 
+// Chat Messages table
+export const chatMessages = pgTable('chat_messages', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  bookingId: uuid('booking_id').references(() => seatBookings.id).notNull(),
+  senderId: uuid('sender_id').references(() => users.id).notNull(),
+  receiverId: uuid('receiver_id').references(() => users.id).notNull(),
+  
+  message: text('message').notNull(),
+  isRead: boolean('is_read').default(false),
+  
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    bookingIdIdx: index('chat_booking_id_idx').on(table.bookingId),
+    senderIdIdx: index('chat_sender_id_idx').on(table.senderId),
+  }
+})
+
+// Tips table
+export const tips = pgTable('tips', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  bookingId: uuid('booking_id').references(() => seatBookings.id).notNull(),
+  fromUserId: uuid('from_user_id').references(() => users.id).notNull(),
+  toUserId: uuid('to_user_id').references(() => users.id).notNull(),
+  
+  amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
+  message: text('message'),
+  
+  status: text('status').default('completed'), // 'pending', 'completed', 'failed'
+  
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+})
+
+// Keeper Verifications table (ระบบยืนยันตัวตน)
+export const keeperVerifications = pgTable('keeper_verifications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  keeperId: uuid('keeper_id').references(() => seatKeepers.id).notNull(),
+  
+  verificationType: text('verification_type').notNull(), // 'id_card', 'selfie', 'video', 'phone'
+  status: text('status').default('pending'), // 'pending', 'approved', 'rejected'
+  
+  // เอกสารยืนยัน
+  documentUrl: text('document_url'),
+  idCardNumber: text('id_card_number'),
+  phoneNumber: text('phone_number'),
+  phoneVerified: boolean('phone_verified').default(false),
+  
+  verifiedBy: uuid('verified_by').references(() => users.id),
+  verifiedAt: timestamp('verified_at', { mode: 'date' }),
+  rejectionReason: text('rejection_reason'),
+  
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),
+})
+
+// Partner Venues table (ร้านพาร์ทเนอร์)
+export const partnerVenues = pgTable('partner_venues', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  ownerId: uuid('owner_id').references(() => users.id).notNull(),
+  
+  venueName: text('venue_name').notNull(),
+  venueType: text('venue_type').notNull(), // 'bar', 'pub', 'club', 'restaurant'
+  description: text('description'),
+  
+  // Location
+  zone: text('zone').notNull(),
+  city: text('city').notNull(),
+  address: text('address'),
+  latitude: decimal('latitude', { precision: 10, scale: 8 }),
+  longitude: decimal('longitude', { precision: 11, scale: 8 }),
+  
+  // Contact
+  phone: text('phone'),
+  email: text('email'),
+  website: text('website'),
+  
+  // Media
+  logoUrl: text('logo_url'),
+  images: jsonb('images').$type<string[]>(),
+  
+  // Details
+  musicStyle: text('music_style'),
+  capacity: integer('capacity'),
+  openingHours: jsonb('opening_hours').$type<{
+    day: string
+    open: string
+    close: string
+  }[]>(),
+  amenities: jsonb('amenities').$type<string[]>(), // ['parking', 'wifi', 'vip_room']
+  
+  // Stats
+  rating: decimal('rating', { precision: 3, scale: 2 }).default('0'),
+  totalReviews: integer('total_reviews').default(0),
+  totalBookings: integer('total_bookings').default(0),
+  
+  // Status
+  isVerified: boolean('is_verified').default(false),
+  isActive: boolean('is_active').default(true),
+  
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    ownerIdIdx: index('venue_owner_id_idx').on(table.ownerId),
+    zoneIdx: index('venue_zone_idx').on(table.zone),
+    isActiveIdx: index('venue_is_active_idx').on(table.isActive),
+  }
+})
+
+// Events table (อีเวนท์พิเศษ)
+export const events = pgTable('events', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  venueId: uuid('venue_id').references(() => partnerVenues.id).notNull(),
+  createdBy: uuid('created_by').references(() => users.id).notNull(),
+  
+  title: text('title').notNull(),
+  description: text('description'),
+  eventType: text('event_type').notNull(), // 'live_band', 'dj_night', 'special_promo', 'theme_party'
+  
+  // Timing
+  startTime: timestamp('start_time', { mode: 'date' }).notNull(),
+  endTime: timestamp('end_time', { mode: 'date' }).notNull(),
+  
+  // Media
+  posterUrl: text('poster_url'),
+  images: jsonb('images').$type<string[]>(),
+  
+  // Promotion
+  hasPromotion: boolean('has_promotion').default(false),
+  promotionDetails: jsonb('promotion_details').$type<{
+    type: string // 'discount', 'free_drink', 'buy_one_get_one'
+    value: number
+    description: string
+  }>(),
+  discountPercentage: integer('discount_percentage'),
+  
+  // Booking
+  requiresBooking: boolean('requires_booking').default(false),
+  maxCapacity: integer('max_capacity'),
+  currentBookings: integer('current_bookings').default(0),
+  bookingFee: decimal('booking_fee', { precision: 10, scale: 2 }),
+  
+  // Status
+  status: text('status').default('upcoming'), // 'upcoming', 'ongoing', 'completed', 'cancelled'
+  isPublished: boolean('is_published').default(true),
+  isFeatured: boolean('is_featured').default(false),
+  
+  // Stats
+  viewCount: integer('view_count').default(0),
+  interestedCount: integer('interested_count').default(0),
+  
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    venueIdIdx: index('event_venue_id_idx').on(table.venueId),
+    startTimeIdx: index('event_start_time_idx').on(table.startTime),
+    statusIdx: index('event_status_idx').on(table.status),
+  }
+})
+
+// Event Bookings table (จองเข้าร่วมอีเวนท์)
+export const eventBookings = pgTable('event_bookings', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  eventId: uuid('event_id').references(() => events.id).notNull(),
+  userId: uuid('user_id').references(() => users.id).notNull(),
+  
+  numberOfPeople: integer('number_of_people').default(1),
+  totalAmount: decimal('total_amount', { precision: 10, scale: 2 }),
+  
+  status: text('status').default('confirmed'), // 'pending', 'confirmed', 'cancelled', 'attended'
+  
+  // Check-in
+  checkedInAt: timestamp('checked_in_at', { mode: 'date' }),
+  
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+})
+
+// Venue Analytics table (สถิติร้าน)
+export const venueAnalytics = pgTable('venue_analytics', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  venueId: uuid('venue_id').references(() => partnerVenues.id).notNull(),
+  
+  // Date
+  date: timestamp('date', { mode: 'date' }).notNull(),
+  
+  // Metrics
+  totalBookings: integer('total_bookings').default(0),
+  totalRevenue: decimal('total_revenue', { precision: 10, scale: 2 }).default('0'),
+  totalViews: integer('total_views').default(0),
+  uniqueVisitors: integer('unique_visitors').default(0),
+  
+  // Seat Keeper Stats
+  seatKeeperBookings: integer('seat_keeper_bookings').default(0),
+  averageWaitTime: decimal('average_wait_time', { precision: 5, scale: 2 }), // minutes
+  
+  // Event Stats
+  eventAttendance: integer('event_attendance').default(0),
+  
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    venueIdDateIdx: index('analytics_venue_date_idx').on(table.venueId, table.date),
+  }
+})
+
 // Export types
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
@@ -296,4 +513,17 @@ export type SeatKeeper = typeof seatKeepers.$inferSelect
 export type NewSeatKeeper = typeof seatKeepers.$inferInsert
 export type SeatBooking = typeof seatBookings.$inferSelect
 export type NewSeatBooking = typeof seatBookings.$inferInsert
+export type ChatMessage = typeof chatMessages.$inferSelect
+export type NewChatMessage = typeof chatMessages.$inferInsert
+export type Tip = typeof tips.$inferSelect
+export type NewTip = typeof tips.$inferInsert
+export type KeeperVerification = typeof keeperVerifications.$inferSelect
+export type NewKeeperVerification = typeof keeperVerifications.$inferInsert
+export type PartnerVenue = typeof partnerVenues.$inferSelect
+export type NewPartnerVenue = typeof partnerVenues.$inferInsert
+export type Event = typeof events.$inferSelect
+export type NewEvent = typeof events.$inferInsert
+export type EventBooking = typeof eventBookings.$inferSelect
+export type NewEventBooking = typeof eventBookings.$inferInsert
+export type VenueAnalytics = typeof venueAnalytics.$inferSelect
 
