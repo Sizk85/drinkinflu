@@ -119,34 +119,30 @@ export default function AdminDashboard() {
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-4 gap-6 mb-12">
-          <Link href="/api/admin/stats" target="_blank">
+          <Link href="/dashboard/admin/users">
             <Button className="h-16 w-full">
+              <Users size={18} className="mr-2" />
+              จัดการผู้ใช้
+            </Button>
+          </Link>
+          <Link href="/dashboard/admin/verifications">
+            <Button variant="outline" className="h-16 w-full">
               <FileText size={18} className="mr-2" />
+              ตรวจสอบงาน
+            </Button>
+          </Link>
+          <Link href="/dashboard/admin/transactions">
+            <Button variant="outline" className="h-16 w-full">
+              <DollarSign size={18} className="mr-2" />
+              ประวัติธุรกรรม
+            </Button>
+          </Link>
+          <Link href="/api/admin/stats" target="_blank">
+            <Button variant="outline" className="h-16 w-full">
+              <TrendingUp size={18} className="mr-2" />
               ดูสถิติ API
             </Button>
           </Link>
-          <Link href="/api/admin/info" target="_blank">
-            <Button variant="outline" className="h-16 w-full">
-              <Settings size={18} className="mr-2" />
-              ข้อมูล Admin
-            </Button>
-          </Link>
-          <Button 
-            variant="outline" 
-            className="h-16 w-full"
-            onClick={async () => {
-              const res = await fetch('/api/admin/stats')
-              const data = await res.json()
-              alert(JSON.stringify(data, null, 2))
-            }}
-          >
-            <DollarSign size={18} className="mr-2" />
-            ดูรายละเอียด
-          </Button>
-          <Button variant="outline" className="h-16 w-full" disabled>
-            <TrendingUp size={18} className="mr-2" />
-            รายงาน (เร็วๆ นี้)
-          </Button>
         </div>
 
         {/* Recent Activity */}
