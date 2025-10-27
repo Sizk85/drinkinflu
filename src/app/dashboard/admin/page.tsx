@@ -1,23 +1,66 @@
+'use client'
+
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
-import { Users, Briefcase, DollarSign, TrendingUp } from 'lucide-react'
-import { auth } from '@/auth'
-import { redirect } from 'next/navigation'
+import { Users, Briefcase, DollarSign, TrendingUp, Settings, FileText } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
-export default async function AdminDashboard() {
-  const session = await auth()
-  
-  // ป้องกันการเข้าถึง - เฉพาะ Admin เท่านั้น
-  if (!session?.user || session.user.role !== 'admin') {
-    redirect('/dashboard')
+export default function AdminDashboard() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [stats, setStats] = useState({
+    users: { total: 0, influencers: 0, bars: 0, newThisMonth: 0 },
+    jobs: { total: 0, active: 0, completed: 0, newThisMonth: 0 },
+    bookings: { total: 0, active: 0 },
+    revenue: { platform: 0, paidToInfluencers: 0 },
+  })
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+      return
+    }
+
+    if (session?.user?.role !== 'admin') {
+      router.push('/dashboard')
+      return
+    }
+
+    if (session?.user) {
+      fetchStats()
+    }
+  }, [session, status, router])
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/admin/stats')
+      const data = await response.json()
+      
+      if (data.success) {
+        setStats(data.stats)
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  // TODO: Fetch real data from API
-  const stats = {
-    totalUsers: 542,
-    totalJobs: 1245,
-    platformRevenue: 245800,
-    activeJobs: 28,
+  if (status === 'loading' || isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="glass rounded-2xl p-12 text-center">
+            <p className="text-muted">กำลังโหลด...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -76,17 +119,33 @@ export default async function AdminDashboard() {
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-4 gap-6 mb-12">
-          <Button className="h-16">
-            จัดการผู้ใช้
+          <Link href="/api/admin/stats" target="_blank">
+            <Button className="h-16 w-full">
+              <FileText size={18} className="mr-2" />
+              ดูสถิติ API
+            </Button>
+          </Link>
+          <Link href="/api/admin/info" target="_blank">
+            <Button variant="outline" className="h-16 w-full">
+              <Settings size={18} className="mr-2" />
+              ข้อมูล Admin
+            </Button>
+          </Link>
+          <Button 
+            variant="outline" 
+            className="h-16 w-full"
+            onClick={async () => {
+              const res = await fetch('/api/admin/stats')
+              const data = await res.json()
+              alert(JSON.stringify(data, null, 2))
+            }}
+          >
+            <DollarSign size={18} className="mr-2" />
+            ดูรายละเอียด
           </Button>
-          <Button variant="outline" className="h-16">
-            📋 ตรวจสอบงาน
-          </Button>
-          <Button variant="outline" className="h-16">
-            ธุรกรรม
-          </Button>
-          <Button variant="outline" className="h-16">
-            รายงาน
+          <Button variant="outline" className="h-16 w-full" disabled>
+            <TrendingUp size={18} className="mr-2" />
+            รายงาน (เร็วๆ นี้)
           </Button>
         </div>
 

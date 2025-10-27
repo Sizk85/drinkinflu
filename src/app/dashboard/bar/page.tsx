@@ -1,35 +1,86 @@
+'use client'
+
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Wallet, Briefcase, Users, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
-import { auth } from '@/auth'
-import { redirect } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { formatCurrency } from '@/lib/pricing'
+import { formatJobDate } from '@/lib/date-utils'
 
-export default async function BarDashboard() {
-  const session = await auth()
-  
-  if (!session?.user) {
-    redirect('/auth/signin')
+export default function BarDashboard() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [stats, setStats] = useState({
+    walletBalance: 0,
+    activeJobs: 0,
+    totalApplications: 0,
+    totalSpent: 0,
+  })
+  const [activeJobs, setActiveJobs] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+      return
+    }
+
+    if (session?.user) {
+      fetchDashboardData()
+    }
+  }, [session, status, router])
+
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch wallet balance
+      const balanceRes = await fetch('/api/wallet/balance')
+      const balanceData = await balanceRes.json()
+
+      // Fetch jobs
+      const jobsRes = await fetch('/api/jobs?status=open')
+      const jobsData = await jobsRes.json()
+
+      // Fetch applications count
+      const appsRes = await fetch('/api/applications')
+      const appsData = await appsRes.json()
+
+      // Fetch transactions for total spent
+      const txRes = await fetch('/api/wallet/transactions')
+      const txData = await txRes.json()
+      const totalSpent = txData.transactions
+        ?.filter((tx: any) => parseFloat(tx.amount) < 0)
+        .reduce((sum: number, tx: any) => sum + Math.abs(parseFloat(tx.amount)), 0) || 0
+
+      setStats({
+        walletBalance: balanceData.balance || 0,
+        activeJobs: jobsData.jobs?.length || 0,
+        totalApplications: appsData.applications?.filter((app: any) => app.status === 'pending').length || 0,
+        totalSpent,
+      })
+
+      setActiveJobs(jobsData.jobs?.slice(0, 5) || [])
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  // TODO: Fetch real data from API based on session.user.id
-  const stats = {
-    walletBalance: 45200,
-    activeJobs: 3,
-    totalApplications: 15,
-    totalSpent: 128500,
+  if (status === 'loading' || isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="glass rounded-2xl p-12 text-center">
+            <p className="text-muted">กำลังโหลด...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
-
-  const activeJobs = [
-    {
-      id: '1',
-      title: 'Friday Night Party @ Route 66',
-      date: 'พรุ่งนี้ 20:00',
-      required: 5,
-      accepted: 2,
-      status: 'open',
-    },
-  ]
 
   return (
     <div className="min-h-screen">
@@ -50,7 +101,7 @@ export default async function BarDashboard() {
               <span className="text-xs text-muted">ยอดคงเหลือ</span>
             </div>
             <div className="text-3xl font-bold text-primary">
-              ฿{stats.walletBalance.toLocaleString()}
+              {formatCurrency(stats.walletBalance)}
             </div>
             <Link href="/wallet">
               <Button size="sm" className="w-full mt-3">เติมเงิน</Button>
@@ -81,7 +132,7 @@ export default async function BarDashboard() {
               <span className="text-xs text-muted">ใช้จ่ายทั้งหมด</span>
             </div>
             <div className="text-3xl font-bold">
-              ฿{stats.totalSpent.toLocaleString()}
+              {formatCurrency(stats.totalSpent)}
             </div>
             <p className="text-xs text-muted mt-2">ตลอดเวลา</p>
           </div>
@@ -91,7 +142,7 @@ export default async function BarDashboard() {
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           <Link href="/post-job">
             <Button className="w-full h-20 text-lg">
-              ➕ โพสต์งานใหม่
+              โพสต์งานใหม่
             </Button>
           </Link>
           <Link href="/dashboard/bar/applications">
@@ -101,7 +152,7 @@ export default async function BarDashboard() {
           </Link>
           <Link href="/profiles/me">
             <Button variant="outline" className="w-full h-20 text-lg">
-              ⚙️ แก้ไขโปรไฟล์
+              แก้ไขโปรไฟล์
             </Button>
           </Link>
         </div>
@@ -129,11 +180,11 @@ export default async function BarDashboard() {
                 <div key={job.id} className="flex items-center justify-between p-4 bg-card rounded-xl">
                   <div>
                     <h3 className="font-bold mb-1">{job.title}</h3>
-                    <p className="text-sm text-muted">{job.date}</p>
+                    <p className="text-sm text-muted">{formatJobDate(job.date)}</p>
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold">
-                      {job.accepted}/{job.required} คน
+                      {job.acceptedCount || 0}/{job.requiredCount || 1} คน
                     </div>
                     <span className="text-xs px-2 py-1 rounded-lg bg-green-500/20 text-green-500">
                       {job.status === 'open' ? 'เปิดรับสมัคร' : job.status}

@@ -209,7 +209,7 @@ export default function SeatKeeperPage() {
           </Link>
           <Link href="/seat-keeper/settings">
             <Button variant="outline" className="w-full h-16 text-lg">
-              ⚙️ ตั้งค่าโซนและเวลา
+              ตั้งค่าโซนและเวลา
             </Button>
           </Link>
           <Link href="/wallet">
