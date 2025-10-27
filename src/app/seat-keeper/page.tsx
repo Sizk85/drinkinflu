@@ -4,15 +4,20 @@ import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { useToast } from '@/components/ui/use-toast'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/pricing'
 import { formatDateTime } from '@/lib/date-utils'
 import { Clock, MapPin, CheckCircle, DollarSign } from 'lucide-react'
 import Link from 'next/link'
 
 export default function SeatKeeperPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
-  const [bookings, setBookings] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [bookings, setBookings] = useState<any[]>([])
+  const [keeperProfile, setKeeperProfile] = useState<any>(null)
   const [stats, setStats] = useState({
     totalEarnings: 0,
     totalBookings: 0,
@@ -20,43 +25,80 @@ export default function SeatKeeperPage() {
     activeBookings: 0,
   })
 
-  // Mock data - ในการใช้งานจริงจะดึงจาก API
   useEffect(() => {
-    setStats({
-      totalEarnings: 4500,
-      totalBookings: 12,
-      rating: 4.8,
-      activeBookings: 2,
-    })
-    
-    setBookings([
-      {
-        id: '1',
-        venueName: 'Demon Bar',
-        venueZone: 'ทองหล่อ',
-        keeperStartTime: new Date(Date.now() + 2 * 60 * 60 * 1000),
-        customerArrivalTime: new Date(Date.now() + 4 * 60 * 60 * 1000),
-        keeperFee: 300,
-        status: 'confirmed',
-      },
-    ] as any)
-  }, [])
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+      return
+    }
+
+    if (session?.user) {
+      fetchKeeperData()
+    }
+  }, [session, status, router])
+
+  const fetchKeeperData = async () => {
+    try {
+      // Fetch keeper profile
+      const profileRes = await fetch('/api/seat-keepers')
+      const profileData = await profileRes.json()
+      
+      if (profileData.keepers && profileData.keepers.length > 0) {
+        const keeper = profileData.keepers[0]
+        setKeeperProfile(keeper)
+        setStats({
+          totalEarnings: parseFloat(keeper.totalEarnings || 0),
+          totalBookings: keeper.totalBookings || 0,
+          rating: parseFloat(keeper.rating || 0),
+          activeBookings: 0,
+        })
+      }
+
+      // Fetch bookings
+      const bookingsRes = await fetch('/api/seat-bookings')
+      const bookingsData = await bookingsRes.json()
+      setBookings(bookingsData.bookings || [])
+      
+      // Count active bookings
+      const active = bookingsData.bookings?.filter((b: any) => 
+        b.status === 'confirmed' || b.status === 'keeper_arrived'
+      ).length || 0
+      setStats(prev => ({ ...prev, activeBookings: active }))
+    } catch (error) {
+      console.error('Error fetching keeper data:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleAcceptBooking = async (bookingId: string) => {
+    if (!keeperProfile?.id) {
+      toast({
+        title: 'เกิดข้อผิดพลาด',
+        description: 'กรุณาสมัครเป็น Seat Keeper ก่อน',
+        variant: 'destructive',
+      })
+      return
+    }
+
     setIsLoading(true)
     try {
       const response = await fetch(`/api/seat-bookings/${bookingId}/accept`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ seatKeeperId: 'temp-keeper-id' }),
+        body: JSON.stringify({ seatKeeperId: keeperProfile.id }),
       })
 
-      if (!response.ok) throw new Error('ไม่สามารถรับงานได้')
+      const data = await response.json()
+
+      if (!response.ok) throw new Error(data.error || 'ไม่สามารถรับงานได้')
 
       toast({
         title: 'รับงานสำเร็จ!',
         description: 'กรุณาไปตามเวลาที่กำหนด',
       })
+
+      // Refresh data
+      await fetchKeeperData()
     } catch (error: any) {
       toast({
         title: 'เกิดข้อผิดพลาด',
@@ -95,6 +137,19 @@ export default function SeatKeeperPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (status === 'loading' || isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="glass rounded-2xl p-12 text-center">
+            <p className="text-muted">กำลังโหลด...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

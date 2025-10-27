@@ -7,6 +7,11 @@ import { redirect } from 'next/navigation'
 export default async function AdminDashboard() {
   const session = await auth()
   
+  // ป้องกันการเข้าถึง - เฉพาะ Admin เท่านั้น
+  if (!session?.user || session.user.role !== 'admin') {
+    redirect('/dashboard')
+  }
+  
   if (!session?.user || session.user.role !== 'admin') {
     redirect('/dashboard')
   }

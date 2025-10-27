@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Menu, X, LogOut } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
+import { UserDropdown } from '@/components/user-dropdown'
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -44,15 +45,7 @@ export function Navbar() {
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             {isLoggedIn ? (
-              <>
-                <Link href="/dashboard">
-                  <Button variant="ghost">แดชบอร์ด</Button>
-                </Link>
-                <Button variant="ghost" onClick={() => signOut({ callbackUrl: '/' })}>
-                  <LogOut size={16} className="mr-2" />
-                  ออกจากระบบ
-                </Button>
-              </>
+              <UserDropdown />
             ) : (
               <>
                 <Link href="/auth/signin">

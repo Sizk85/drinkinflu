@@ -1,43 +1,56 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Wallet as WalletIcon, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { formatCurrency, calcWithdrawal } from '@/lib/pricing'
+import { formatDistance } from 'date-fns'
+import { th } from 'date-fns/locale'
 
 export default function WalletPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const { toast } = useToast()
-  const [balance, setBalance] = useState(15420)
+  const [balance, setBalance] = useState(0)
   const [amount, setAmount] = useState('')
   const [mode, setMode] = useState<'topup' | 'withdraw'>('topup')
   const [isProcessing, setIsProcessing] = useState(false)
+  const [transactions, setTransactions] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Mock transactions
-  const transactions = [
-    {
-      id: '1',
-      type: 'job_received',
-      amount: 800,
-      description: 'รับเงินจากงาน Friday Night Party',
-      date: '2 ชั่วโมงที่แล้ว',
-    },
-    {
-      id: '2',
-      type: 'withdrawal',
-      amount: -5000,
-      description: 'ถอนเงิน (ค่าธรรมเนียม 100 บาท)',
-      date: 'เมื่อวาน',
-    },
-    {
-      id: '3',
-      type: 'topup',
-      amount: 10000,
-      description: 'เติมเงินเข้า Wallet',
-      date: '3 วันที่แล้ว',
-    },
-  ]
+  // Fetch wallet data
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+      return
+    }
+
+    if (session?.user?.email) {
+      fetchWalletData()
+    }
+  }, [session, status, router])
+
+  const fetchWalletData = async () => {
+    try {
+      // Fetch balance
+      const balanceRes = await fetch('/api/wallet/balance')
+      const balanceData = await balanceRes.json()
+      setBalance(balanceData.balance || 0)
+
+      // Fetch transactions
+      const txRes = await fetch('/api/wallet/transactions')
+      const txData = await txRes.json()
+      setTransactions(txData.transactions || [])
+    } catch (error) {
+      console.error('Error fetching wallet data:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -82,6 +95,19 @@ export default function WalletPage() {
   }
 
   const withdrawalPreview = amount && parseFloat(amount) > 0 ? calcWithdrawal(parseFloat(amount)) : null
+
+  if (status === 'loading' || isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-6 py-12">
+          <div className="glass rounded-2xl p-12 text-center">
+            <p className="text-muted">กำลังโหลด...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen">
@@ -201,19 +227,46 @@ export default function WalletPage() {
         <div className="glass rounded-2xl p-6">
           <h2 className="text-xl font-bold mb-4">ประวัติการทำรายการ</h2>
 
-          <div className="space-y-3">
-            {transactions.map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between p-4 bg-card rounded-xl">
-                <div>
-                  <div className="font-medium mb-1">{tx.description}</div>
-                  <div className="text-xs text-muted">{tx.date}</div>
-                </div>
-                <div className={`text-lg font-bold ${tx.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {tx.amount > 0 ? '+' : ''}{formatCurrency(Math.abs(tx.amount))}
-                </div>
-              </div>
-            ))}
-          </div>
+          {transactions.length === 0 ? (
+            <div className="text-center py-12 text-muted">
+              <p>ยังไม่มีรายการ</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {transactions.map((tx) => {
+                const isPositive = parseFloat(tx.amount) > 0
+                const formattedDate = formatDistance(new Date(tx.createdAt), new Date(), {
+                  addSuffix: true,
+                  locale: th,
+                })
+                
+                return (
+                  <div key={tx.id} className="flex items-center justify-between p-4 bg-card rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${
+                        isPositive ? 'bg-green-500/20' : 'bg-red-500/20'
+                      }`}>
+                        {isPositive ? (
+                          <ArrowUpCircle className="text-green-500" size={20} />
+                        ) : (
+                          <ArrowDownCircle className="text-red-500" size={20} />
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-medium">{tx.description || tx.type}</div>
+                        <div className="text-xs text-muted">{formattedDate}</div>
+                      </div>
+                    </div>
+                    <div className={`text-lg font-bold ${
+                      isPositive ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      {isPositive ? '+' : ''}{formatCurrency(Math.abs(parseFloat(tx.amount)))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

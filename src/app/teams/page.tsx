@@ -1,22 +1,64 @@
+'use client'
+
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Users, Plus, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 export default function TeamsPage() {
-  // TODO: Fetch real teams from API
-  const myTeam = {
-    id: '1',
-    name: "Bella's Squad",
-    members: 3,
-    totalEarnings: 45200,
-    myCommission: 6780,
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [myTeam, setMyTeam] = useState<any>(null)
+  const [members, setMembers] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+      return
+    }
+
+    if (session?.user) {
+      fetchTeamData()
+    }
+  }, [session, status, router])
+
+  const fetchTeamData = async () => {
+    try {
+      const response = await fetch('/api/teams')
+      const data = await response.json()
+      
+      if (data.teams && data.teams.length > 0) {
+        const team = data.teams[0]
+        setMyTeam(team)
+        
+        // Fetch team members
+        const membersRes = await fetch(`/api/teams/${team.id}/members`)
+        const membersData = await membersRes.json()
+        setMembers(membersData.members || [])
+      }
+    } catch (error) {
+      console.error('Error fetching team data:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const members = [
-    { id: '1', name: 'Max Party', jobs: 12, earnings: 18400 },
-    { id: '2', name: 'Jay Vibes', jobs: 8, earnings: 12500 },
-  ]
+  if (status === 'loading' || isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="max-w-5xl mx-auto px-6 py-12">
+          <div className="glass rounded-2xl p-12 text-center">
+            <p className="text-muted">กำลังโหลด...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen">
