@@ -81,7 +81,7 @@ export default function AdminDashboard() {
               <Users className="text-primary" size={24} />
               <span className="text-xs text-muted">ผู้ใช้ทั้งหมด</span>
             </div>
-            <div className="text-3xl font-bold">{stats.totalUsers}</div>
+            <div className="text-3xl font-bold">{stats.users.total}</div>
             <p className="text-xs text-muted mt-2">ร้าน + อินฟลู</p>
           </div>
 
@@ -90,9 +90,9 @@ export default function AdminDashboard() {
               <Briefcase className="text-accent" size={24} />
               <span className="text-xs text-muted">งานทั้งหมด</span>
             </div>
-            <div className="text-3xl font-bold">{stats.totalJobs}</div>
+            <div className="text-3xl font-bold">{stats.jobs.total}</div>
             <p className="text-xs text-muted mt-2">
-              {stats.activeJobs} งานกำลังเปิด
+              {stats.jobs.active} งานกำลังเปิด
             </p>
           </div>
 
@@ -102,7 +102,7 @@ export default function AdminDashboard() {
               <span className="text-xs text-muted">รายได้แพลตฟอร์ม</span>
             </div>
             <div className="text-3xl font-bold text-green-500">
-              ฿{stats.platformRevenue.toLocaleString()}
+              ฿{stats.revenue.platform.toLocaleString()}
             </div>
             <p className="text-xs text-muted mt-2">คอมมิชชัน 15%</p>
           </div>
