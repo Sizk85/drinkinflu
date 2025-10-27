@@ -11,10 +11,6 @@ export default async function AdminDashboard() {
   if (!session?.user || session.user.role !== 'admin') {
     redirect('/dashboard')
   }
-  
-  if (!session?.user || session.user.role !== 'admin') {
-    redirect('/dashboard')
-  }
 
   // TODO: Fetch real data from API
   const stats = {
