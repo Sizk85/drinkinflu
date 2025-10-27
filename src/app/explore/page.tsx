@@ -9,19 +9,27 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function ExplorePage() {
-  // Fetch open jobs with bar details
-  const openJobs = await db
-    .select({
-      job: jobs,
-      bar: users,
-    })
-    .from(jobs)
-    .leftJoin(users, eq(jobs.barId, users.id))
-    .where(and(
-      eq(jobs.status, 'open'),
-      gte(jobs.date, new Date())
-    ))
-    .orderBy(jobs.date)
+  let openJobs: any[] = []
+  let error = null
+
+  try {
+    // Fetch open jobs with bar details
+    openJobs = await db
+      .select({
+        job: jobs,
+        bar: users,
+      })
+      .from(jobs)
+      .leftJoin(users, eq(jobs.barId, users.id))
+      .where(and(
+        eq(jobs.status, 'open'),
+        gte(jobs.date, new Date())
+      ))
+      .orderBy(jobs.date)
+  } catch (err) {
+    console.error('Error fetching jobs:', err)
+    error = err
+  }
 
   return (
     <div className="min-h-screen">
@@ -46,10 +54,18 @@ export default async function ExplorePage() {
 
           {/* Jobs Grid */}
           <div className="lg:col-span-3">
-            {openJobs.length === 0 ? (
+            {error ? (
+              <div className="glass rounded-2xl p-12 text-center">
+                <h3 className="text-2xl font-bold mb-2 text-red-500">เกิดข้อผิดพลาด</h3>
+                <p className="text-muted">ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง</p>
+                <p className="text-xs text-muted mt-4">
+                  ตรวจสอบว่า database ทำงานอยู่หรือไม่
+                </p>
+              </div>
+            ) : openJobs.length === 0 ? (
               <div className="glass rounded-2xl p-12 text-center">
                 <h3 className="text-2xl font-bold mb-2">ไม่พบงาน</h3>
-                <p className="text-muted">ลองเปลี่ยนฟิลเตอร์หรือกลับมาใหม่ภายหลัง</p>
+                <p className="text-muted">ยังไม่มีงานในขณะนี้ กรุณากลับมาใหม่ภายหลัง</p>
               </div>
             ) : (
               <div className="space-y-6">
