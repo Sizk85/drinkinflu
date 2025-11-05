@@ -7,29 +7,64 @@ import { useToast } from '@/components/ui/use-toast'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
+import { Wine, Star, ChevronRight } from 'lucide-react'
+import { BANGKOK_ZONES } from '@/lib/constants'
 
 function SignUpForm() {
   const { toast } = useToast()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const defaultRole = searchParams.get('role') || 'influencer'
+  const defaultRole = searchParams.get('role')
 
+  const [step, setStep] = useState(defaultRole ? 2 : 1) // ถ้ามี role ใน URL ข้ามไปขั้นตอน 2
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
-  const [role, setRole] = useState(defaultRole)
+  const [role, setRole] = useState<string>(defaultRole || '')
   const [isLoading, setIsLoading] = useState(false)
+
+  // Fields for Bar
+  const [barName, setBarName] = useState('')
+  const [barZone, setBarZone] = useState('')
+  const [barMusicStyle, setBarMusicStyle] = useState('')
+  const [barLocation, setBarLocation] = useState('')
+
+  // Fields for Influencer
+  const [igUsername, setIgUsername] = useState('')
+  const [igFollowers, setIgFollowers] = useState('')
+  const [city, setCity] = useState('กรุงเทพฯ')
+  const [zones, setZones] = useState<string[]>([])
+
+  const handleSelectRole = (selectedRole: string) => {
+    setRole(selectedRole)
+    setStep(2)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
+      const payload: any = { email, password, name, role }
+
+      // เพิ่มข้อมูลตามบทบาท
+      if (role === 'bar') {
+        payload.barName = barName
+        payload.barZone = barZone
+        payload.barLocation = barLocation
+        payload.barMusicStyle = barMusicStyle
+      } else if (role === 'influencer') {
+        payload.igUsername = igUsername
+        payload.igFollowers = igFollowers ? parseInt(igFollowers) : 0
+        payload.city = city
+        payload.zones = zones
+      }
+
       // Create account
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name, role }),
+        body: JSON.stringify(payload),
       })
 
       const data = await response.json()
@@ -65,6 +100,14 @@ function SignUpForm() {
     }
   }
 
+  const toggleZone = (zone: string) => {
+    if (zones.includes(zone)) {
+      setZones(zones.filter(z => z !== zone))
+    } else {
+      setZones([...zones, zone])
+    }
+  }
+
   const handleGoogleSignUp = async () => {
     try {
       await signIn('google', { callbackUrl: '/dashboard' })
@@ -77,81 +120,274 @@ function SignUpForm() {
     }
   }
 
+  // Step 1: เลือกบทบาท
+  if (step === 1) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-2">เลือกบทบาทของคุณ</h2>
+          <p className="text-muted">คุณต้องการสมัครเป็น?</p>
+        </div>
+
+        <div className="grid gap-4">
+          <button
+            onClick={() => handleSelectRole('influencer')}
+            className="glass rounded-2xl p-8 hover:glow-accent transition-all group text-left"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-xl bg-accent/20 flex items-center justify-center group-hover:bg-accent/30 transition-colors">
+                  <Star size={32} className="text-accent" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold mb-1">อินฟลูเอนเซอร์</h3>
+                  <p className="text-sm text-muted">รับงานจากร้าน โพสต์คอนเทนต์ รับเงิน</p>
+                </div>
+              </div>
+              <ChevronRight size={24} className="text-muted group-hover:text-accent transition-colors" />
+            </div>
+          </button>
+
+          <button
+            onClick={() => handleSelectRole('bar')}
+            className="glass rounded-2xl p-8 hover:glow-primary transition-all group text-left"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-xl bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+                  <Wine size={32} className="text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold mb-1">ร้านเหล้า / บาร์</h3>
+                  <p className="text-sm text-muted">โพสต์งาน หาอินฟลู โปรโมทร้าน</p>
+                </div>
+              </div>
+              <ChevronRight size={24} className="text-muted group-hover:text-primary transition-colors" />
+            </div>
+          </button>
+        </div>
+
+        <div className="text-center pt-6">
+          <Link href="/auth/signin" className="text-sm text-muted hover:text-accent">
+            มีบัญชีอยู่แล้ว? เข้าสู่ระบบ
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Step 2: กรอกข้อมูล
   return (
     <div className="glass rounded-2xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="mb-6">
+        <button
+          onClick={() => setStep(1)}
+          className="text-sm text-muted hover:text-white flex items-center gap-1"
+        >
+          ← เปลี่ยนบทบาท
+        </button>
+        <div className="mt-4 flex items-center gap-3">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+            role === 'bar' ? 'bg-primary/20' : 'bg-accent/20'
+          }`}>
+            {role === 'bar' ? (
+              <Wine size={24} className="text-primary" />
+            ) : (
+              <Star size={24} className="text-accent" />
+            )}
+          </div>
+          <div>
+            <h3 className="font-bold">
+              {role === 'bar' ? 'สมัครสำหรับร้านเหล้า/บาร์' : 'สมัครสำหรับอินฟลูเอนเซอร์'}
+            </h3>
+            <p className="text-sm text-muted">
+              {role === 'bar' ? 'โพสต์งานและหาอินฟลู' : 'รับงานและสร้างรายได้'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* ฟิลด์พื้นฐาน */}
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            {role === 'bar' ? 'ชื่อผู้ติดต่อ' : 'ชื่อ-นามสกุล'}
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={role === 'bar' ? 'ชื่อผู้ติดต่อร้าน' : 'ชื่อของคุณ'}
+            required
+            className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none"
+          />
+        </div>
+
+        {/* ฟิลด์สำหรับ Bar */}
+        {role === 'bar' && (
+          <>
             <div>
-              <label className="block text-sm font-medium mb-2">คุณคือ?</label>
+              <label className="block text-sm font-medium mb-2">ชื่อร้าน</label>
+              <input
+                type="text"
+                value={barName}
+                onChange={(e) => setBarName(e.target.value)}
+                placeholder="Route 66 Club"
+                required
+                className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">โซน</label>
               <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-card border border-border text-white"
+                value={barZone}
+                onChange={(e) => setBarZone(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none"
               >
-                <option value="influencer">อินฟลูเอนเซอร์</option>
-                <option value="bar">ร้านเหล้า/บาร์</option>
+                <option value="">เลือกโซน</option>
+                {BANGKOK_ZONES.map((zone) => (
+                  <option key={zone} value={zone}>{zone}</option>
+                ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                {role === 'bar' ? 'ชื่อร้าน' : 'ชื่อ-นามสกุล'}
-              </label>
+              <label className="block text-sm font-medium mb-2">ที่อยู่ร้าน</label>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={role === 'bar' ? 'ชื่อร้านของคุณ' : 'ชื่อของคุณ'}
-                required
-                className="w-full px-4 py-3 rounded-xl bg-card border border-border text-white"
+                value={barLocation}
+                onChange={(e) => setBarLocation(e.target.value)}
+                placeholder="123 ถนนสุขุมวิท กรุงเทพฯ"
+                className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">อีเมล</label>
+              <label className="block text-sm font-medium mb-2">สไตล์เพลง</label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-                className="w-full px-4 py-3 rounded-xl bg-card border border-border text-white"
+                type="text"
+                value={barMusicStyle}
+                onChange={(e) => setBarMusicStyle(e.target.value)}
+                placeholder="EDM, Hip Hop, Techno"
+                className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none"
+              />
+            </div>
+          </>
+        )}
+
+        {/* ฟิลด์สำหรับ Influencer */}
+        {role === 'influencer' && (
+          <>
+            <div>
+              <label className="block text-sm font-medium mb-2">Instagram Username</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">@</span>
+                <input
+                  type="text"
+                  value={igUsername}
+                  onChange={(e) => setIgUsername(e.target.value)}
+                  placeholder="yourusername"
+                  required
+                  className="w-full pl-8 pr-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">จำนวน Followers (โดยประมาณ)</label>
+              <input
+                type="number"
+                value={igFollowers}
+                onChange={(e) => setIgFollowers(e.target.value)}
+                placeholder="10000"
+                min="0"
+                className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">รหัสผ่าน</label>
+              <label className="block text-sm font-medium mb-2">เมือง</label>
               <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="กรุงเทพฯ"
                 required
-                minLength={8}
-                className="w-full px-4 py-3 rounded-xl bg-card border border-border text-white"
+                className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none"
               />
-              <p className="text-xs text-muted mt-1">ต้องมีอย่างน้อย 8 ตัวอักษร</p>
             </div>
 
-            <div className="text-sm">
-              <label className="flex items-start gap-2 cursor-pointer">
-                <input type="checkbox" required className="rounded accent-primary mt-1" />
-                <span className="text-muted">
-                  ฉันยอมรับ{' '}
-                  <Link href="/legal/terms" className="text-primary hover:underline">
-                    ข้อกำหนดและเงื่อนไข
-                  </Link>
-                  {' '}และ{' '}
-                  <Link href="/legal/privacy" className="text-primary hover:underline">
-                    นโยบายความเป็นส่วนตัว
-                  </Link>
-                </span>
-              </label>
+            <div>
+              <label className="block text-sm font-medium mb-2">โซนที่สะดวกไปทำงาน (เลือกได้หลายโซน)</label>
+              <div className="grid grid-cols-3 gap-2">
+                {BANGKOK_ZONES.slice(0, 9).map((zone) => (
+                  <button
+                    key={zone}
+                    type="button"
+                    onClick={() => toggleZone(zone)}
+                    className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                      zones.includes(zone)
+                        ? 'bg-accent text-black font-medium'
+                        : 'bg-card border border-border text-muted hover:border-accent'
+                    }`}
+                  >
+                    {zone}
+                  </button>
+                ))}
+              </div>
             </div>
+          </>
+        )}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
-            </Button>
-          </form>
+        {/* ฟิลด์ร่วม */}
+        <div>
+          <label className="block text-sm font-medium mb-2">อีเมล</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            required
+            className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">รหัสผ่าน</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+            minLength={8}
+            className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none"
+          />
+          <p className="text-xs text-muted mt-1">ต้องมีอย่างน้อย 8 ตัวอักษร</p>
+        </div>
+
+        <div className="text-sm">
+          <label className="flex items-start gap-2 cursor-pointer">
+            <input type="checkbox" required className="rounded accent-primary mt-1" />
+            <span className="text-muted">
+              ฉันยอมรับ{' '}
+              <Link href="/legal/terms" className="text-primary hover:underline">
+                ข้อกำหนดและเงื่อนไข
+              </Link>
+              {' '}และ{' '}
+              <Link href="/legal/privacy" className="text-primary hover:underline">
+                นโยบายความเป็นส่วนตัว
+              </Link>
+            </span>
+          </label>
+        </div>
+
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
+        </Button>
+      </form>
 
           <div className="mt-6 text-center text-sm text-muted">
             มีบัญชีอยู่แล้ว?{' '}
